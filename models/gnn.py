@@ -421,10 +421,10 @@ class DiscreteGNN(nn.Module):
         return codebook_indices
 
     def from_pretrained(self, model_file):
-        rank_zero_print(f"{self.__class__}: Load state dict from {model_file}")
+        rank_zero_print(f"{self.__class__.__name__}: Load state dict from {model_file}")
         state_dict = torch.load(model_file)["state_dict"]
         state_dict = {k[14:]: v for k, v in state_dict.items() if k.startswith("model.encoder.")}
-        self.load_state_dict(state_dict, strict=False)
+        self.load_state_dict(state_dict, strict=True)
 
 
 class GNN_graphpred(nn.Module):
