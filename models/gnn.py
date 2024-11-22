@@ -490,7 +490,22 @@ class GNN_graphpred(nn.Module):
             self.graph_pred_linear = nn.Linear(self.mult * self.emb_dim, self.num_tasks)
 
     def from_pretrained(self, model_file):
-        self.gnn.load_state_dict(torch.load(model_file))
+        rank_zero_print(f"{self.__class__.__name__}: Load state dict from {model_file}")
+        state_dict = torch.load(model_file)["state_dict"]
+        state_dict = {k[17:]: v for k, v in state_dict.items() if k.startswith("model.mnm_module.gnn.")}
+        missing, unexpected = self.load_state_dict(state_dict, strict=False)
+        if unexpected:
+            if missing:
+                raise RuntimeError("something unexpected module found:\n" + "\n".join(unexpected) + "\nalso, some modules are missing:\n" + "\n".join(_missing) + "\nwe have:\n" + "\n".join(state_dict.keys()))  # fmt: skip
+            else:
+                raise RuntimeError("something unexpected module found:\n" + "\n".join(unexpected))
+        if missing:
+            _missing = []
+            for mod in missing:
+                if "graph_pred_linear" not in mod:
+                    _missing.append(mod)
+            if _missing:
+                raise RuntimeError("some modules are missing:\n" + "\n".join(_missing) + "\nwe have:\n" + "\n".join(state_dict.keys()))  # fmt: skip
 
     def forward(self, *argv):
         if len(argv) == 4:
