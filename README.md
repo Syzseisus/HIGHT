@@ -33,6 +33,27 @@
     * 또한 Mole-BERT에서 아이디어를 차용했다는 DALL-E에서도 `"scaled cosine error"`에 대한 설명은 나와 있지 않다.
     * 따라서 우리 역시 단순한 CE loss를 그대로 사용하지만, 함수화 해두었기에 추후에 변경은 가능하다.
 * `bash `[`./scripts/step01_train_vqvae.sh`](https://github.com/Syzseisus/HIGHT/blob/main/scripts/step01_train_vqvae.sh)과 `bash `[`./scripts/step02_train_tmcl.sh`](https://github.com/Syzseisus/HIGHT/blob/main/scripts/step02_train_tmcl.sh)를 통해 토크나이저를 학습시켜둔다.
+* `bash `[`./scripts/stepXX_molebert_ft_classfication.sh](https://github.com/Syzseisus/HIGHT/blob/main/scripts/stepXX_molebert_ft_classfication.sh)을 이용해 classification dataset에 대해 finetuning 및 테스트가 가능하다.
+  ```
+  # 실행 script
+  bash ./scripts/stepXX_molebert_ft_classfication.sh \
+      --per_device_train_batch_size 4096 \
+      --per_device_valid_batch_size 4096 \
+      --per_device_test_batch_size 4096 \
+      --tmcl_ckpt_path ./save/tmcl/ckpt/run-20241120_094738-atom_128_each__motif_graph_64_9zd51xls/last.ckpt
+  ```
+  Table: Comparison between original paper results and our reproduced results (AUC-ROC scores).  
+  Reproduced results are evaluated using three different checkpoints: the last epoch, the best training loss, and the best validation AUC.
+  | Dataset | Paper | Last Epoch | Best Train Loss | Best Val AUC |
+  |---------|-------|------------|-----------------|--------------|
+  | Tox21   | 76.8  | 71.90      | 71.75           | 71.90        |
+  | ToxCast | 64.3  | 60.10      | 57.53           | 60.10        |
+  | Sider   | 62.8  | 59.04      | 60.27           | 58.47        |
+  | ClinTox | 78.9  | 83.52      | 83.19           | 83.47        |
+  | MUV     | 78.6  | 72.38      | 51.84           | 73.52        |
+  | HIV     | 78.2  | 71.71      | 72.93           | 73.33        |
+  | BBBP    | 71.9  | 70.59      | 58.55           | 63.69        |
+  | BACE    | 80.8  | 75.43      | 76.26           | 77.37        |
 
 
 ### LGLM 구조
